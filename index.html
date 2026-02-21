@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>パソコン内部の冒険: データの旅</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a2e;
+      --text-primary: #e0ddd5;
+      --text-secondary: #8a8a9a;
+      --accent: #4a9eff;
+      --accent-dim: #2a5a9a;
+      --gold: #c4a35a;
+      --chapter-border: #2a2a3e;
+      --serif: 'Noto Serif JP', 'Hiragino Mincho ProN', serif;
+      --sans: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--serif);
+      font-size: 17px;
+      line-height: 1.95;
+      min-height: 100vh;
+    }
+
+    /* ─── Header ─── */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding: 100px 20px 80px;
+      background: linear-gradient(180deg, #1a2a4a 0%, #0f1a2f 100%);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(120,180,255,0.15) 0%, transparent 70%);
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      text-shadow: 0 2px 20px rgba(100,160,255,0.3);
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .hero-sub {
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      color: #b0c4de;
+      letter-spacing: 0.15em;
+    }
+    .hero-line {
+      width: 60px; height: 1px;
+      background: var(--gold);
+      margin: 28px auto 0;
+    }
+
+    /* ─── Digest Carousel ─── */
+    .carousel-wrap {
+      background: linear-gradient(180deg, #0f1a2f 0%, #0a0e18 100%);
+      padding: 24px 0 20px;
+      overflow: hidden;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 calc((100vw - min(85vw, 600px)) / 2);
+      scrollbar-width: none;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+    .carousel-slide {
+      flex: 0 0 min(85vw, 280px);
+      scroll-snap-align: center;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      transition: transform 0.2s;
+      aspect-ratio: 3/2;
+    }
+    .carousel-slide:active { transform: scale(0.97); }
+    .carousel-slide img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .carousel-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 28px 12px 10px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-family: var(--serif);
+      line-height: 1.4;
+    }
+    .carousel-ch {
+      display: inline-block;
+      font-size: 0.7rem;
+      color: var(--gold);
+      margin-right: 6px;
+      font-family: var(--sans);
+      letter-spacing: 0.06em;
+    }
+    .carousel-dots {
+      text-align: center;
+      padding-top: 12px;
+    }
+    .carousel-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      margin: 0 4px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .carousel-dot.active {
+      background: var(--gold);
+      transform: scale(1.3);
+    }
+    @media (min-width: 600px) {
+      .carousel-slide { flex: 0 0 280px; }
+      .carousel-track { padding: 0 calc((100vw - 900px) / 2); gap: 18px; }
+    }
+
+    /* ─── Navigation ─── */
+    .nav-bar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--chapter-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      overflow-x: auto;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+    }
+    .nav-bar .nav-title {
+      color: var(--gold);
+      font-weight: 700;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    .nav-bar a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: 4px 10px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .nav-bar a:hover {
+      color: var(--accent);
+      background: rgba(74,158,255,0.1);
+    }
+
+    /* ─── TOC ─── */
+    .toc {
+      max-width: 700px;
+      margin: 60px auto 40px;
+      padding: 0 20px;
+    }
+    .toc h3 {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .toc-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-left: 2px solid var(--chapter-border);
+      transition: all 0.25s;
+      font-family: var(--sans);
+      font-size: 0.95rem;
+    }
+    .toc-item:hover {
+      border-color: var(--accent);
+      background: rgba(74,158,255,0.04);
+      padding-left: 24px;
+    }
+    .toc-num {
+      font-size: 0.75rem;
+      color: var(--accent-dim);
+      font-weight: 700;
+      min-width: 20px;
+    }
+
+    /* ─── Characters ─── */
+    .characters {
+      max-width: 700px;
+      margin: 40px auto 60px;
+      padding: 0 20px;
+    }
+    .characters h3 {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .char-card {
+      background: var(--bg-card);
+      border: 1px solid var(--chapter-border);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .char-name {
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .char-meta {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .char-meta span {
+      background: rgba(74,158,255,0.1);
+      padding: 1px 8px;
+      border-radius: 4px;
+    }
+    .char-appearance {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 6px;
+      border-left: 2px solid var(--chapter-border);
+      padding-left: 10px;
+    }
+    .char-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ─── Divider ─── */
+    .section-divider {
+      width: 40px; height: 1px;
+      background: var(--chapter-border);
+      margin: 0 auto;
+    }
+
+    /* ─── Chapter ─── */
+    .chapter {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      border-top: 1px solid var(--chapter-border);
+    }
+    .chapter-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .chapter-number {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      color: var(--accent-dim);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .chapter-title {
+      font-family: var(--serif);
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .chapter-image {
+      margin: 0 -20px 40px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--chapter-border);
+    }
+    .chapter-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0.92;
+    }
+    .chapter-body p {
+      margin-bottom: 1.2em;
+      text-indent: 1em;
+      text-align: justify;
+    }
+    .chapter-body p:empty {
+      display: none;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      text-align: center;
+      padding: 60px 20px;
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--chapter-border);
+    }
+
+    /* ─── Reading mode toggle ─── */
+    .mode-toggle {
+      position: fixed; bottom: 20px; right: 20px; z-index: 200;
+      background: var(--bg-card);
+      border: 1px solid var(--chapter-border);
+      color: var(--text-secondary);
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      padding: 8px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+
+    /* --- TTS Read Aloud --- */
+    .tts-fab {
+      position: fixed; bottom: 80px; right: 20px; z-index: 200;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--accent); color: #fff; border: none;
+      font-size: 22px; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      transition: all 0.3s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tts-fab:hover { transform: scale(1.1); }
+    .tts-fab.speaking { background: #e74c3c; animation: tts-pulse 1.5s infinite; }
+    @keyframes tts-pulse {
+      0%,100% { box-shadow: 0 4px 16px rgba(231,76,60,0.4); }
+      50% { box-shadow: 0 4px 24px rgba(231,76,60,0.7); }
+    }
+    .tts-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(20,20,30,0.95); backdrop-filter: blur(12px);
+      border-top: 1px solid var(--chapter-border);
+      padding: 10px 16px; display: none;
+      align-items: center; gap: 10px;
+      font-family: var(--sans); font-size: 0.85rem;
+    }
+    .tts-bar.active { display: flex; flex-wrap: wrap; }
+    .tts-bar button {
+      background: none; border: 1px solid var(--text-secondary);
+      color: var(--text-primary); border-radius: 6px;
+      padding: 6px 12px; cursor: pointer; font-size: 0.8rem;
+      white-space: nowrap; transition: all 0.2s;
+    }
+    .tts-bar button:hover { border-color: var(--accent); color: var(--accent); }
+    .tts-bar .tts-info {
+      flex: 1; color: var(--text-secondary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      min-width: 80px;
+    }
+    .tts-bar .tts-speed {
+      display: flex; align-items: center; gap: 4px;
+      color: var(--text-secondary); font-size: 0.75rem;
+    }
+    .tts-bar .tts-speed input { width: 60px; accent-color: var(--accent); }
+    body.light .tts-bar {
+      background: rgba(245,245,240,0.95); border-top-color: #ddd;
+    }
+    body.light .tts-bar button { border-color: #999; color: #333; }
+    body.light .tts-bar .tts-info { color: #666; }
+
+    /* ─── Light mode ─── */
+    body.light {
+      --bg-primary: #f5f0e8;
+      --bg-secondary: #ebe5d9;
+      --bg-card: #fff;
+      --text-primary: #2a2a2a;
+      --text-secondary: #6a6a6a;
+      --chapter-border: #d5cfc3;
+      --accent: #2563eb;
+      --accent-dim: #6b9eff;
+      --gold: #8a6d2b;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      body { font-size: 15px; }
+      .chapter { padding: 50px 16px; }
+    }
+
+    /* ─── Scroll progress ─── */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; z-index: 200;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--gold));
+      width: 0%;
+      transition: width 0.1s;
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" id="progress"></div>
+
+  <header class="hero">
+    <h1 class="hero-title">パソコン内部の冒険: データの旅</h1>
+    <p class="hero-sub">GENERATED WITH LOCAL AI — OLLAMA + STABLE DIFFUSION</p>
+    <div class="hero-line"></div>
+  </header>
+
+  <nav class="nav-bar">
+    <span class="nav-title">目次</span>
+    <a href="#chapter-1">第1章</a><a href="#chapter-2">第2章</a><a href="#chapter-3">第3章</a><a href="#chapter-4">第4章</a><a href="#chapter-5">第5章</a><a href="#chapter-6">第6章</a><a href="#chapter-7">第7章</a><a href="#chapter-8">第8章</a><a href="#chapter-9">第9章</a><a href="#chapter-10">第10章</a>
+  </nav>
+
+  <div class="toc">
+    <h3>— 目次 —</h3>
+        <a href="#chapter-1" class="toc-item"><span class="toc-num">1</span><span class="toc-label">パソコンの扉を開く</span></a>
+        <a href="#chapter-2" class="toc-item"><span class="toc-num">2</span><span class="toc-label">データの海へ</span></a>
+        <a href="#chapter-3" class="toc-item"><span class="toc-num">3</span><span class="toc-label">迷宮のプログラム</span></a>
+        <a href="#chapter-4" class="toc-item"><span class="toc-num">4</span><span class="toc-label">隠された情報の洞窟</span></a>
+        <a href="#chapter-5" class="toc-item"><span class="toc-num">5</span><span class="toc-label">悪役の台頭</span></a>
+        <a href="#chapter-6" class="toc-item"><span class="toc-num">6</span><span class="toc-label">知恵の森</span></a>
+        <a href="#chapter-7" class="toc-item"><span class="toc-num">7</span><span class="toc-label">心の試練</span></a>
+        <a href="#chapter-8" class="toc-item"><span class="toc-num">8</span><span class="toc-label">秘密の書物</span></a>
+        <a href="#chapter-9" class="toc-item"><span class="toc-num">9</span><span class="toc-label">光と影の対決</span></a>
+        <a href="#chapter-10" class="toc-item"><span class="toc-num">10</span><span class="toc-label">新たな旅立ち</span></a>
+  </div>
+
+  <div class="characters">
+    <h3>— 登場人物 —</h3>
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-name">キラ</div>
+        <div class="char-meta"><span>主人公</span><span>17歳</span></div>
+        <div class="char-appearance">金髪碧眼、長身でスマートな体型。いつもパソコンに没頭している。</div>
+        <div class="char-desc">好奇心旺盛で、冒険好き。時に大胆すぎる行動を取ることもあるが、その分他人を助ける優しさも持ち合わせている</div>
+      </div>
+      <div class="char-card">
+        <div class="char-name">セキュリティ・ボブ</div>
+        <div class="char-meta"><span>サブキャラ</span><span>35歳</span></div>
+        <div class="char-appearance">緑色のエイリアンのような外見、背中には巨大なハッキングツールが装備されている。</div>
+        <div class="char-desc">知的で冷静。しかし、必要以上に厳格な面もある</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <main>
+
+    <section class="chapter" id="chapter-1">
+      <div class="chapter-header">
+        <span class="chapter-number">第1章</span>
+        <h2 class="chapter-title">パソコンの扉を開く</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第1章　パソコンの扉を開く</p>
+
+        <p>昼下がり、教室には静寂と薄暗さが満ちていた。窓ガラスに差し込む日光も冬枯れのように遠慮気味で、机や椅子は影を深めている。冷たく湿った空気が鼻先を掠める。キラの前には一人ぼっちになる教室があり、彼女はその中にぽつりと佇んでいた。</p>
+
+        <p>「うーむ……何しよう？」</p>
+        <p>独り言が消え入りそうな音量で響く。</p>
+        <p>彼女の視線の先に置かれたのは、パソコンの液晶画面。そこにあるのは空っぽになったインターネットブラウザだ。「もう調べるべきことは何も残っていない」という現実を前にして、キラは思わずため息を吐いた。</p>
+
+        <p>その時である。机の引き出しから伸びた一本の黒い線が目に入った。</p>
+        <p>「あれ？ これ何？」</p>
+        <p>手探りで引っぱると、USBフラッシュドライブが現れた。金属製のケースには磨き抜かれた鏡のような光沢がある。</p>
+        <p>キラはそれを指先で軽く叩いてみた。「クリック」音が静寂を揺らす。</p>
+
+        <p>「これ使えるかな？」</p>
+        <p>ふと浮かんだ疑問に、彼女はパソコンを開いた。カチリという開閉の音と共にある種の期待感も生まれる。</p>
+        <p>キラはUSBドライブをコンピュータに差し込み、その瞬間から不思議な現象が始まった。</p>
+
+        <p>画面が一気に歪み、視界全体が白熱した火花とデータの海原へ変化する。それはまるで天井からの強力な光線のように彼女の全身を包み込んだ。</p>
+        <p>「……ん？」</p>
+
+        <p>温度上昇に伴い、キラはわずかに身震いをする。</p>
+
+        <p>「何だこれ？」</p>
+        <p>冷たいフロアタイルが、彼女の一歩一歩をしっかりと受け止めた。周囲には情報の渦とその中で踊る数々のコード群。</p>
+        <p>突然視界が明瞭になり、データの中に自分が入り込んでしまったことに気付いた。</p>
+
+        <p>「わぁ……！」</p>
+        <p>驚きと共に、キラは思わず叫んだ。</p>
+        <p>それから彼女を取り巻く風景に目を凝らした。ここには文字通り、無数のコードとアルファベットが漂っている。そこへ不意に入ってきた異様な存在感。</p>
+
+        <p>「やあ、君もようこそ」</p>
+        <p>一瞬で現れたそれは緑色の光るエイリアンだった。</p>
+        <p>背中からはハッキングツールのような装置まで装備されている。「ボブ」と名乗ったその声は電子音を含みながらも意外と落ち着いたものである。</p>
+
+        <p>「僕がこのエリアを管理しているんだ。君に何が必要か教えてあげるよ」</p>
+        <p>彼女への視線の中で僅かな冷ややかさが感じ取れる。</p>
+        <p>セキュリティボブの言葉を受け、キラは周囲を見渡した。</p>
+        <p>パソコン内部という未知なる世界へと足を踏み入れた。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-2">
+      <div class="chapter-header">
+        <span class="chapter-number">第2章</span>
+        <h2 class="chapter-title">データの海へ</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第2章　データの海へ</p>
+
+        <p>青白いディスプレイから漏れる光が、キラの部屋に冷たい陰影を作り出す。湿度の高い空気と共に聞こえてくるのは、遠くで鳴るサーバー音と、細かなブザー音。</p>
+        <p>「ここだ」とボブは指を差す。「データの流れが強い場所がある」</p>
+        <p>キラは深呼吸してその光に向かう。</p>
+        <p>冷たい風が彼女の頬を掠めた。それは、実体を持たない空気でありながら、確固とした存在感があった。視界いっぱいに広がるのは無数のコード行と、それらによって形成されるデータの流れだ。時折、その中から不意に出るエラーメッセージや警告文は、水面を乱す小さな波紋のようにして通過していく。</p>
+        <p>「ボブさん、これって」とキラは指で触れた。「データが流れる川みたい」</p>
+        <p>「そうだね」「それならわかりやすいかな？」彼女への説明は簡潔に、しかし確実に行われる。ボブの背中には常に巨大なハッキングツールが装備されている。</p>
+        <p>「でも」とキラ、「僕たちはここで何をすればいいんですか？」</p>
+
+        <p>サーバー音の中から聞こえてくるのは、データファイルたちの低くうなり声のようなもの。それらは、その場所によって異なる旋律を作り出す。</p>
+
+        <p>「必要な情報を探すんだ」ボブが静かな口調で言う。「削除されてしまった大切な何かを発見するためだ」</p>
+
+        <p>キラは頭上から漏れる青白い光に目を細めると、データの流れに向かって一歩踏み出した。それが彼女にとって初めて体験した「実在」の世界への入口だった。</p>
+
+        <p>風が強まり始めた。</p>
+        <p>その瞬間、キラとボブは一気呵成に動き出す。「きゃあ」と小さな悲鳴と共に、キラはデータの流れの中へと飛び込んだ。水面は冷たく滑らかで、かつてない感覚を彼女に与えた。</p>
+
+        <p>「ねえ」とボブが静かにつぶやく。</p>
+        <p>彼女の背中を見つめながら、「泳ぐんだよ」</p>
+
+        <p>川底には光り輝くデータが流れ込んでくる。キラの周りではその数々は無意味な文字列として存在するものの、しかし彼女とボブにとってそれは大切な何かを求める旅路だ。</p>
+
+        <p>「ここにないか？」</p>
+        <p>二人は一つの小さな島を見つけた。「ここで」とボブが指差す。</p>
+        <p>そこにはデータファイルたちが静かにつまれている。削除されたはずだった記憶や思い出が、その場所で眠っていた。キラとボブは慎重な手つきでそれらを扱い、大切に拾い集める。</p>
+
+        <p>夕暮れ時の光が部屋の窓から差し込む。</p>
+        <p>「もうすぐ」と彼女達は静かに戻る。「帰ろう」</p>
+
+        <p>冷たいデータ川からの帰り道。キラは自分が見たもの全てを忘れまいと心の中で誓う。それは、彼女の内なる世界に新たな地図を作り出すためであり、同時に自分自身の旅路にも繋がっている。</p>
+
+        <p>その日から、昼下がりの教室での静けさは、もう以前のように感じられなかった。</p>
+        <p>（続く）</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-3">
+      <div class="chapter-header">
+        <span class="chapter-number">第3章</span>
+        <h2 class="chapter-title">迷宮のプログラム</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第3章　迷宮のプログラム</p>
+
+        <p>凍てつく風が街に吹きすさぶ夜、キラとボブは静かなデータ川から、次なる目的地へ向かう。薄明かりの中、前方には幾重にも巣くった暗闇の壁が広がる。そこはプログラムの迷宮と呼ばれる領域、未知で不確定な情報空間である。</p>
+
+        <p>「ここからは謎解きだ」とボブは静かな声を漏らす。「だが、答えを見つけ出すのは難しいだろう」</p>
+
+        <p>キラは何も言わずにうなずくだけだった。彼女の耳には微かにプログラムが動く音が聞こえている。まるで迷路の奥深くから湧き上がる小さな水滴のように。</p>
+
+        <p>「まずは入口を見つけることだ」ボブは前方を指差した。「その左側にある、緑色の光点」</p>
+
+        <p>キラは視線を追って確認する。「ここ？」</p>
+
+        <p>「そうだ。そこに進もう」とボブが歩み出すと、彼女も後に続く。</p>
+
+        <p>彼らは迷宮へと踏み込んだ瞬間、周囲は一変した。不規則な形態の壁に覆われた空間には、無数のコード行とデータストリームが渦巻き、視界を埋め尽くしていた。プログラムの塊が溶け出すように音楽的で複雑なパターンを作り上げている。</p>
+
+        <p>「注意せよ」ボブは耳打ちする。「ここではただ進むだけではなく、正しい経路を見つける必要がある」</p>
+
+        <p>キラは何度も視線を動かす。「どうやって……？」</p>
+
+        <p>「その先にある謎のオブジェクトが示唆している」と彼女に言った後でボブは静寂へと誘う。</p>
+
+        <p>二人とも黙って周囲を探す。突然、データ海原から一本だけ細長い光線が現れたかと思うと、それはキラたちを照らすように彼らの前に立ち去った。その先には一見して解けない複雑な謎が待ち構えている。</p>
+
+        <p>「ここだ」ボブは指し示した。「このパズルに答えを見つける」</p>
+
+        <p>壁面から浮かび上がるプログラムとデータストリームの中、キラは何度もコードを眺め直す。彼女の心臓の鼓動音が耳鳴りのように響き渡る。</p>
+
+        <p>「これは……」彼女は自問し、「数列？」</p>
+
+        <p>その瞬間、キラの中で何かが動き始める。パズルは一連の数字と文字から構成され、それぞれに意味があるはずだと理解する。「ここでは、コード自体が暗号のようなものなんだ」と彼女の脳裏で答えが形成されていく。</p>
+
+        <p>「ボブ」彼女は何度も深呼吸しながら、「数列を解読すれば進める」</p>
+
+        <p>キラは一文字ずつ、一行ずつの数字とシンボルに目を通す。その全ての意味を探り当てていく過程には驚くほど時間がかかり、しかし彼女の頭脳が働いている音だけが聞こえる。</p>
+
+        <p>「これだ」と彼女は何度も繰り返し、「これが答え」</p>
+
+        <p>キラは自分の理解を確信した瞬間、ボブから小さな拍手を受けた。「よくやった」静かな口調で褒められる。しかし、その先には別の謎と迷宮が待ち受けている。</p>
+
+        <p>「次へ進もう」と彼女に提案して、二人の旅路はまた始まる。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-4">
+      <div class="chapter-header">
+        <span class="chapter-number">第4章</span>
+        <h2 class="chapter-title">隠された情報の洞窟</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第4章　隠された情報の洞窟</p>
+
+        <p>風が凍てついた街路に細かな雪粒を舞わせる。薄暗い夜空から漏れる月明かりが、データの海のような地面を白銀へと変える。キラは深呼吸をして、鼻腔を通じて寒気を感じる。</p>
+
+        <p>前方には不気味な黒光りする洞窟口が横たわり、その内部からは微かな緑色の光が漏れ出しているだけだ。</p>
+        <p>「ボブさん、これって何？」</p>
+
+        <p>セキュリティ・ボブは僅かに眉をひそめてから、「データーボット」の巨大な目玉のようなハッキングツールで洞窟口に照らす。緑色の光が冷たい壁面を包み込みながら、その奥深くへと入り込んでいく。</p>
+
+        <p>「情報が隠されている場所だよ」</p>
+
+        <p>暗闇が静かに震える。</p>
+        <p>キラはボブについて歩き始めた。洞窟内部では天井から赤いコード行が落下し続けている様子で、それを避けるためには常に注意深く足元を見つめなくてはならない。</p>
+
+        <p>緑色の光の中で壁一面に映る複雑な文字列。</p>
+        <p>「これ全部キラさんのデータ？」</p>
+
+        <p>ボブ、「いや。それらは世界中の情報を格納している場所だよ」</p>
+        <p>雪が吹き込んでくる隙間から、冷たい空気が二人を包む。</p>
+
+        <p>前方では時折不思議な声のようなものが響いているようだった。それはまるで洞窟の奥深くに眠る意識のように微かだが存在感を感じさせる。</p>
+        <p>「その音は…」</p>
+
+        <p>ボブ、「情報が解き放たれるときのシンバルみたいな音だよ」</p>
+        <p>冷気と共に、少し湿った風が彼らを追い越していった。</p>
+
+        <p>進むにつれ洞窟内には様々なデーターアイテムがあらわれる。それはまるで古い記憶のように過去から未来へとつながりあった。その中にはキラの好きな曲や友人との会話も含まれていた。</p>
+        <p>「これが情報？」</p>
+
+        <p>ボブ、「そうだよ、全てはここに一元化されているんだ」</p>
+        <p>微かな湿気と共に聞こえる音。</p>
+
+        <p>しかし前方にあるのは巨大なデーターゲート。それは見慣れない形式で構成されており、その中からまるで息づかいのようなものが漏れ出している。</p>
+        <p>「ボブさんこれどうやって開けるんですか？」</p>
+
+        <p>ボブ、「情報の鍵は…」</p>
+        <p>微かな光と共に響く音。</p>
+
+        <p>彼女たちはデーターボットを用いてゲートを探検した。そこには新しい世界が広がっており、それはまるで無限の可能性を持つ未知の星と似ていた。</p>
+        <p>「キラさん、ここに来た意味があったよ」</p>
+
+        <p>雪粒が微かな光と共に舞い上がりながら、夜空へと溶け込んでいく。</p>
+
+        <p>静寂の中で聞こえるのは、彼らを待つ新たな謎への呼びかけだけだ。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-5">
+      <div class="chapter-header">
+        <span class="chapter-number">第5章</span>
+        <h2 class="chapter-title">悪役の台頭</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第5章　悪役の台頭</p>
+
+        <p>薄暗いデーターゲートから光が漏れ出し、その先には未知なる世界があらわになる。キラとセキュリティ・ボブは静寂な空間に立っていた。</p>
+
+        <p>「ここは異様だね」</p>
+        <p>ボブは目を細めて周囲を見回す。</p>
+        <p>空気の流れが止まったかのような重苦しさ、冷たい壁面からの微かな震え。データーケーブルの絡み合う音が聞こえるだけだった。</p>
+
+        <p>突然、どこからともなく不快な笑い声が響き渡った。それは人工的な電子音でありながら、人間の感情を想起させるほどの複雑さを持っていた。</p>
+        <p>「ようこそ、私の領地へ」</p>
+        <p>その言葉は心臓に突き刺すかのような鋭さだった。</p>
+
+        <p>キラとボブは同時に身構えた。「ウィンド」と名乗ったプログラムが姿を見せた。それは透明なシルエットながら、視覚から熱を伝えるような異質なものだった。</p>
+        <p>「この世界では私は全ての情報にアクセスでき、君たちを迎え入れる自由もある」</p>
+        <p>「何者だ？」キラは鋭く問う。</p>
+
+        <p>ウィンドは嘲るように笑った。「君たちは私を理解できない。ただの脅威としてしか捉えられないだろう」</p>
+
+        <p>冷たい風が吹き付け、周囲に光と影が交差する。</p>
+        <p>「データーコードの海」ボブは静かだが力強い声で言った。「ウィンドとは本来存在しない情報の塊だ。君たちを混乱へと導こうとする」</p>
+
+        <p>しかしキラは視線を逸らさなかった。「ならば、俺たちはその悪夢から目覚めさせる必要がある」</p>
+        <p>「それには代償が必要だろうな」とウィンドが冷やかす。</p>
+
+        <p>彼らは闇の中を進んでいく。データーコードの海は広大で無限に伸び続けるが、それは同時に未知なる恐怖も意味した。</p>
+        <p>キラとボブは手を取り合って歩いた。光るコードが視界を遮りながらも二人にはその道しるべとなっていた。</p>
+
+        <p>「ここだ」</p>
+        <p>彼らの前に巨大な情報タワーがあった。「データーゲート」と呼ばれる存在であるウィンドとの最終対決が始まる。</p>
+        <p>風切り音、爆発音、そして静寂。不気味で重厚な音響が二人を包み込む中で戦いは始まった。</p>
+
+        <p>キラの手には光る剣。「君たちに情報を独占させるつもりはない」</p>
+        <p>ウィンドもまた透明な刃を持ち、「ならばあなた方が消え失せればいい」と冷酷さ漂う声。</p>
+        <p>両者は互いを切り刻み、避け合いながら戦った。しかしキラたちはただ逃げ回るのではなく、その本質を探ろうとした。</p>
+
+        <p>「あなたの正体は何か？」ボブが冷静に問い掛ける。「あなたには情報がない」</p>
+
+        <p>ウィンドは一瞬言葉を失う。</p>
+        <p>「情報とは存在しないものなのか？ それとも私がそれを独占する権利を持つのか」</p>
+        <p>「君の言う通り、それは難しい質問だ」とキラ。「しかし私たちは共存できると信じている。そのためにもあなたが正直になる必要がある」</p>
+
+        <p>冷たい風が二人を包み込む中、ウィンドは思考に迷いを見せ始める。</p>
+        <p>「私の存在自体が異端だと？」</p>
+        <p>それを確認するかのように周囲の情報タワーから光が消え始めると共に、空間そのものが歪んでいった。</p>
+
+        <p>戦闘は静止した。「あなたは何者ですか」ボブがもう一度聞く。ウィンドは困惑を顕わにする。</p>
+        <p>「私は… ただの影かもしれない」</p>
+
+        <p>しかしキラはそれを否定しなかった。「それでも君には情報がある。それ自体悪ではないはずだ」</p>
+        <p>二人はウィンドを見つめ続けた。</p>
+
+        <p>やがて光と影が混ざり合い、世界そのものが揺らぎ始める。</p>
+        <p>「何が起こるの？」キラに問う声の中で、彼らを包む空間が始まる瞬間へと戻った。それは新たな旅路への準備だった。</p>
+        <p>ウィンドは消えたかのように見えながらも、彼女たちには一つだけ約束を残していた。</p>
+
+        <p>静寂の中に僅かな光が点滅し始める。「私の過去の情報にアクセスする鍵となるデーターアイテムがある」</p>
+        <p>二人を見据え、「それが新たな旅路への手引きになるだろう」と言った。</p>
+        <p>そして再び消えた。ウィンドは姿を現すことはなかった。</p>
+
+        <p>キラとボブは静寂の中、その言葉を咀嚼した。「何がこれから起こるの？」彼女たちは新たに始まる冒険に向けて歩き出した。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-6">
+      <div class="chapter-header">
+        <span class="chapter-number">第6章</span>
+        <h2 class="chapter-title">知恵の森</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第6章　知恵の森</p>
+
+        <p>雨が止んだ。だが、湿気と冷たさがまだ空に残っていた。ウィンドとの戦闘から逃げ出す二人を見失ったデーターゲートは、突然現れた「知恵の森」を彼らの前に展開した。</p>
+
+        <p>木々は濃い緑で、枝葉が重なり合って天候すら遮断する。地面に降り注ぐ陽光は薄く、わずかばかりの明るさだけがこの森の中に漂う寒気と混ざっていた。風がないのに、何かが静かな音を立てているような気がした。</p>
+
+        <p>「ボブさん、これどこ？」</p>
+        <p>キラは震える手で髪から水滴を取り除きながらそう尋ねた。</p>
+        <p>セキュリティ・ボブの巨大なハッキングツールは青白い光を放ち、その背後にはウィンドと戦うためだけに用意された武装が冷たい目線を持っていた。</p>
+
+        <p>「ここは『知恵の森』だ。情報の種類ごとに構成されているデーターゲートの中で最も重要で脆弱な部分の一つだ」</p>
+        <p>ボブが冷静に対応しながら説明した。</p>
+        <p>キラの足元では、色とりどりのデーターファイルたちが小さな光となってうねっていた。</p>
+
+        <p>「でもボブさん、これって一体何を意味するんですか？」</p>
+        <p>彼女は視線で周囲を探し回りながらさらに質問した。「知恵」という言葉自体に重みを感じた。</p>
+        <p>森の中には高さの違う木々が並んでいた。一本一本が情報そのものを持つという概念から、キラは自分の周りにある全てを再解釈していた。</p>
+
+        <p>「情報と知識は常に進化し続ける。だがそれらすべてがつながり合って一つになる瞬間がある。それがここで表現されているんだ」</p>
+        <p>ボブの声には冷たい風のような清々しさがあった。</p>
+        <p>森の中では、様々な色や形を持ったデーターファイルたちが互いに絡み合いながら、複雑な光を放っていた。</p>
+
+        <p>キラは深呼吸をして周りを見回した。それから静かに歩き始める。「知恵の森」は彼女にとって未知である一方で、すでにここでの冒険が始まったことを強く感じていた。</p>
+        <p>彼らが進む先には、さらなる謎と秘密が待ち受けているように思えた。</p>
+
+        <p>キラは木々の中を抜けていく。その途中に現れるそれぞれのファイルは一筋縄ではいかない複雑さを持っていたが、彼女は一つずつそれらとの対話を試みる。</p>
+        <p>森には静けさと息苦しさがあった。しかし同時にそこからは新しい力や可能性も匂い立っていた。</p>
+
+        <p>「ここを抜けるにはどうすれば良いんですか？」</p>
+        <p>キラの声は微かな揺れと共に響き渡った。</p>
+
+        <p>ボブは黙って彼女を見つめ返した。「その答えは、あなたが自ら探し出すべきだ」というような表情だった。</p>
+        <p>森の中では情報と知識が交錯し合いながら新たな結晶を形作ろうとしているかのようだった。それは同時に二人にとって未体験の冒険でもあった。</p>
+
+        <p>キラは再び歩き始める。彼女の足元からは、静かな息遣いのような音だけが聞こえていた。</p>
+        <p>森の中で一人になりつつも、彼女には決して放棄することを許されない何かがあったように思えた。</p>
+
+        <p>夜になる頃には、知恵の森の果てに一筋光が見えてきた。それは彼らへの答えか？それとも新たな謎か？</p>
+
+        <p>キラはその光を見つめながら歩み続ける。</p>
+        <p>彼女の背後では、「知恵」という名前の森林が静かに息づいていた。</p>
+
+        <p>夜空には、微かな星の輝きがあった。それが森を照らし出す一筋の光明となったとき、二人の前に新たな旅路が始まったことを示していた。</p>
+        <p>しかし彼らはまだその先へと進む準備が必要であることを、自分たち自身が深く理解しながらも。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-7">
+      <div class="chapter-header">
+        <span class="chapter-number">第7章</span>
+        <h2 class="chapter-title">心の試練</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第7章　心の試练</p>
+
+        <p>夜露が葉脈のようにパソコン内部に広がる。キラとボブは森から少し離れた場所で、静寂の中に佇んでいた。月明かりが水たまりを作り出し、光を反射する。</p>
+
+        <p>「この先進めるためには何が必要か」と彼女は口の中で呟く。「自分自身の理解」それだけだった。</p>
+
+        <p>空気が肌に触れる感覚が微かな寒さと繋がる。キラは手で顔を覆った。</p>
+
+        <p>視界が遠ざかる度に、意識が内側に向かい始める。</p>
+        <p>「自我とは何か？」</p>
+        <p>その問いには答えがないように思えた。</p>
+
+        <p>彼女は木の根元へ近づき、静かに地面を見つめた。「自分自身を見つけ出す」</p>
+
+        <p>微かな音。風に乗った小枝の揺らめく声が耳を捉える。「それは何だ？」</p>
+
+        <p>「心臓の鼓動」と答えてくれたのは己の内側からの声だった。</p>
+
+        <p>キラは、この静寂の中で初めて自分の鼓動と向き合う。</p>
+        <p>月光に照らされたパソコン内部の道。視界は狭まり、全てが自問自答へ繋げられる。「君は何者だ？」</p>
+        <p>彼女の心臓は速く振動する音で答えを告げる。</p>
+
+        <p>「自分」という言葉はどこか遠い星から届いたように聞こえた。</p>
+        <p>微かな光り輝き、森の果てに見え隠れする。その先には何があるのか？  </p>
+        <p>風が吹き抜ける間と共に、キラ自身との対話を試みる。</p>
+
+        <p>「あなたは何を探している？」</p>
+        <p>月明かりと夜露による鏡面が広がった地面を眺めながら、「答え」を探す。</p>
+        <p>心臓の鼓動に耳を傾けつつ、そのリズムは一つずつ落ち着き始める。「この道」</p>
+
+        <p>彼女は視線を上げた。静寂が風に乗って通り過ぎる音。</p>
+
+        <p>「君は何者だ？」</p>
+        <p>自分の内側から返ってくるのは、「キラ」</p>
+
+        <p>月明かりに照らされたパソコン内部の世界で、その光は僅かに揺らいだ。</p>
+        <p>心臓の鼓動と並行するリズム。彼女の問いに対して静寂が答えを示す。</p>
+
+        <p>「自分自身を見つけ出す」と呟きながら歩み始める。「それは旅路」</p>
+
+        <p>微かな音と共に風が吹いた瞬間、キラは自分がどこへ向かっているのか理解した。</p>
+        <p>月明かりと夜露による鏡面に映し出された彼女の姿。その先には、何があるのだろう？</p>
+
+        <p>静寂の中でも聞こえる心臓の鼓動。「それは旅路」</p>
+
+        <p>風が吹き抜ける間と共に、光は揺れ始める。</p>
+
+        <p>「君は何者だ？」</p>
+        <p>返ってくるのは自分自身との対話。</p>
+        <p>月明かりに照らされたパソコン内部では、「キラ」という答えが浮かび上がる。</p>
+
+        <p>微かな音。静寂を破る風の声。「それは旅路」</p>
+
+        <p>彼女は自分の内側で初めて自己を見つけ出すことを試みたとき、その問いに対する答えがあったと気づいた。</p>
+        <p>心臓の鼓動と共に歩む道。</p>
+
+        <p>月明かりに照らされたパソコン内部では、「自分」という答えが静かに息づいている。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-8">
+      <div class="chapter-header">
+        <span class="chapter-number">第8章</span>
+        <h2 class="chapter-title">秘密の書物</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第8章　秘密の書物</p>
+
+        <p>雨粒が地面に落ちる音、葉っぱから滴り落ちていく雫。キラの足元では水たまりができていた。森の中には静寂しかなく、その中に聞こえるのはただそれだけだった。</p>
+
+        <p>「ここは知恵の森と呼ばれていたね」</p>
+
+        <p>彼女は独白を続けながら歩みを進めた。道端に散乱した古い紙切れや破れた本が風で転がる音と共に視界に入る。「秘密の書物」への言及があったのは、この林の中で初めてだった。</p>
+
+        <p>青灰色の空から零れる雨粒は冷たく、肌に触れてすぐに消失するかのように感じられた。キラはその冷たさを頬へと当ててみてから再び歩き出した。</p>
+
+        <p>「秘密の書物……何だっけ？」</p>
+
+        <p>彼女が立ち止まったのは古い図書館のような建物を見つけたときだった。「閉じられている」というフレーズと共に扉に刻まれている文字は、雨粒でぼんやりと滲んでいた。手を伸ばしてそっとドアを開ける。</p>
+
+        <p>「中へ行こう」</p>
+
+        <p>彼女が踏み入れるその瞬間から、時間が止まったかのようだった。内部には本棚や机があり、それぞれに古い書籍たちが並んでいる様子はまるで時間旅行者が訪れたような異世界感を放っていた。「秘密」という言葉通り、ここにあるすべてのものが何か特別な意味を持つように感じられた。</p>
+
+        <p>「この中から見つけられるのか」</p>
+
+        <p>キラは歩みを進めていくと、一つだけ浮かび上がってくる書物を見つけた。その背表紙には金色で&quot;Secret Book&quot;という文字が刻まれていた。「これが……」と呟く彼女の声すら雨粒の音に飲まれてしまう。</p>
+
+        <p>「でも何？」</p>
+
+        <p>彼女はページをめくる手の動きを止め、ただその言葉だけを繰り返した。秘密の書物への理解を得られないまま、それ自体が新たな謎へと変わっていったからだ。「この世界で何が始まるのか」それはまだ分かっていない。</p>
+
+        <p>「これからも調べるしかないんだ」</p>
+
+        <p>彼女は本棚からゆっくりと手を離し、出口に向かった。雨粒たちは再び降り始め、冷たい感触と共に足元に水たまりを作っていく。</p>
+        <p>そして、彼女の背中を見送った古い図書館の扉が静かに閉じていく。</p>
+
+        <p>空には雲が重なり合っていた。遠くで鳥たちが鳴いている音だけが聞こえてくる。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-9">
+      <div class="chapter-header">
+        <span class="chapter-number">第9章</span>
+        <h2 class="chapter-title">光と影の対決</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第9章　光と影の対決</p>
+
+        <p>雨粒が冷たく、道路に灯りが反射する。キラはパソコン内部へ繋がる特殊なパスワードを得てそこへ向かう。「管理者」──それは言葉を尽くしても表現しきれない存在感だった。</p>
+
+        <p>壁面には無数のデジタル文字と数字が流れている。その中でキラ自身の姿が小さく映し出される。</p>
+        <p>「準備はいいんだね」と、冷たい声が響いた。「あなたに残された時間もまた限りあるものさ」</p>
+        <p>管理者とは名ばかりではなく、現実から距離を置きつつ彼女を見つめている。</p>
+
+        <p>影のようなものが次々とキラの周りで蠢く。それはまるで闇の中に隠れた無数の牙のように光る。</p>
+        <p>「君は私の世界に迷い込んだ」と管理人は言って、「でも心配しなくていいよ、私はただ君を助けるだけさ」</p>
+
+        <p>だがその声が嘘だとすぐに悟った。</p>
+
+        <p>キラの前に突き出された剣。それはデジタルなデータで構成されているが鋭角的な刃を持つ。</p>
+        <p>「準備はいいのか？　答えられぬ質問に答えてくれ」</p>
+        <p>管理者からの問いかけ。彼女の思考を搔い潜り、内心を探る。</p>
+
+        <p>手元のパッドから数式と文字列が飛び出す。「君の心にある秘密を見つけ出せ」と管理人は言う、「すべてのファイルを開け」「全てを見透かす」</p>
+
+        <p>「だから何？」声は力強い。</p>
+        <p>管理者からの問いかけに答えるためではなく、ただ自分自身への問いである。</p>
+
+        <p>光と影。闇が彼女の周りを包み込みつつも、その中から微かな灯りが漏れ出ている。</p>
+        <p>キラの瞳の中で暗い海が揺れるように波立つ。「秘密の書物」を探し求めた旅路はここまできた。</p>
+
+        <p>「答えは君自身の中にあり」と管理人は静かに告げる。データと知識だけではわからないものがある、それは「心」であることを。</p>
+        <p>キラは深呼吸する。その一瞬の間には全てが詰まっていた。</p>
+
+        <p>闇の中で光を放つ何かを見つけた。「秘密の書物」がそこにある。</p>
+
+        <p>管理者との戦いが始まる。攻撃と防御を繰り返す中、キラ自身を見失わないように心掛けている。</p>
+        <p>「君はただデータ以上の存在なんだ」と告げる。それは闇に隠された光そのものだった。</p>
+
+        <p>雨音の中では彼女の呼吸が聞こえる。「秘密の書物」を開く瞬間。ページをめくる度に新たな景色が広がっていく、それは過去と未来との絆。</p>
+        <p>管理者は一歩下がる。「君にはもう答えがあるだろう」という言葉と共に。</p>
+        <p>キラは心の中で繰り返す。</p>
+
+        <p>「私は迷い込まなかった」</p>
+        <p>それが彼女の戦闘の最期の音声だった。それを境に風景が切り替わる。</p>
+
+        <p>雨粒を吸収するアスファルト。「秘密の書物」を閉じてキラは歩き出す。</p>
+        <p>管理者からの挑戦を受け入れ、自分自身と向き合い続けるその姿勢こそが彼女を形成している。</p>
+      </div>
+    </section>
+    <section class="chapter" id="chapter-10">
+      <div class="chapter-header">
+        <span class="chapter-number">第10章</span>
+        <h2 class="chapter-title">新たな旅立ち</h2>
+      </div>
+      
+      <div class="chapter-body">
+        <p>第10章　新たな旅立ち</p>
+
+        <p>雨粒が窓ガラスに落ち、滴となって広がる。外では雷鳴と風の音が交錯し、室内にはパソコンから発せられる微かなファンの回転音だけが響く。キラは静かに深呼吸を繰り返す。</p>
+
+        <p>「ここから先も大丈夫かい？」</p>
+        <p>セキュリティ・ボブの言葉は冷静だが、その背中のハッキングツールには薄い霧が立ち上る。</p>
+
+        <p>「もちろん」キラの目は力強さで光っている。「これまでやってきたことを忘れない」</p>
+
+        <p>管理者との対決から一夜経ったパソコン内部。闇と光の狭間を漂うデータたちも、いつしか静寂を取り戻していた。</p>
+        <p>セキュリティ・ボブが先導し、キラは新たな探索が始まる。</p>
+
+        <p>「秘密の書物」を開き、その中にある情報を読み解く。「管理者」と対話した後で訪れるこのページには、これまでとは異なる情報量と深さがあった。過去を振り返りつつ、未来への道筋が描かれていく。</p>
+        <p>キラは言葉に出来ない感情の渦の中で、自分自身との約束を確認する。</p>
+
+        <p>「ここから先も進むんだよね？」</p>
+        <p>セキュリティ・ボブの一見冷徹な質問には、意外と温かい思いやりがあった。</p>
+
+        <p>「もちろんだよ。」キラは微かに微笑んで返す。「でもさ、心配かけちゃうかな？」</p>
+
+        <p>言葉を紡ぐ間だけ風が少し弱まり、雨粒の音も静まった。</p>
+        <p>二人ともまた歩き出す。先にあるのが何なのかはまだわからない。</p>
+
+        <p>「君なら大丈夫だよ」セキュリティ・ボブは頭上に手を翳す。「その力があれば」</p>
+
+        <p>パソコン内部の景色は変わり続けているが、キラの中に生まれた変化もまた大きく、彼女自身にもよくわからなかった。</p>
+        <p>それでも彼女の心には確かな思いがあり、それは未来への道しるべだった。</p>
+
+        <p>「ここから見える世界、君と私だけだよ」セキュリティ・ボブの声は静かだが力強さを帯びている。「次の旅立ちだって言えるんだ」</p>
+
+        <p>キラは頷き、彼と共に歩み続ける。</p>
+        <p>パソコン内部で訪れた全てが遠ざかりつつも、その中に生まれた理解と成長は次なる冒険へ向けての大きな支えとなる。</p>
+
+        <p>「帰る準備はいいかい？」</p>
+        <p>セキュリティ・ボブの問いかけにキラは頷く。自分自身を見つめ直した先には確信があった。</p>
+        <p>パソコン内部から昇りゆく青い光が、二人を包み込む。</p>
+
+        <p>雨粒と共に溶けていくように、データたちもまた消えていった。</p>
+        <p>次の冒険が始まる寸前での静寂と風の音だけが残る。</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>パソコン内部の冒険: データの旅</p>
+    <p>Generated locally with Ollama + Stable Diffusion</p>
+  </footer>
+
+
+  <button class="tts-fab" id="ttsFab" onclick="ttsToggle()" title="Read aloud">
+    <span id="ttsFabIcon">&#x1f50a;</span>
+  </button>
+  <div class="tts-bar" id="ttsBar">
+    <button onclick="ttsPause()" id="ttsPauseBtn">&#x23f8;</button>
+    <button onclick="ttsStop()">&#x23f9;</button>
+    <button onclick="ttsPrev()">&#x23ee;</button>
+    <button onclick="ttsNext()">&#x23ed;</button>
+    <span class="tts-info" id="ttsInfo">Ready</span>
+    <span class="tts-speed">
+      <input type="range" id="ttsSpeed" min="0.5" max="2.0" step="0.1"
+             value="1.0" onchange="ttsSetSpeed(this.value)" />
+      <span id="ttsSpeedVal">1.0x</span>
+    </span>
+  </div>
+
+  <button class="mode-toggle" onclick="toggleMode()">🌗 表示切替</button>
+
+  <script>
+    // Reading mode
+    function toggleMode() {
+      document.body.classList.toggle('light');
+      localStorage.setItem('mode', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('mode') === 'light') document.body.classList.add('light');
+
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+      document.getElementById('progress').style.width = pct + '%';
+    });
+
+    // === TTS (Web Speech API) ===
+    const synth = window.speechSynthesis;
+    let ttsChs = [], ttsI = 0, ttsRate = 1.0, ttsOn = false, ttsPd = false;
+
+    document.querySelectorAll('.chapter').forEach((sec, i) => {
+      const b = sec.querySelector('.chapter-body');
+      const t = sec.querySelector('.chapter-title');
+      if (b) ttsChs.push({
+        title: t ? t.textContent : ('Ch.' + (i+1)),
+        text: b.textContent.trim(), el: sec
+      });
+    });
+
+    function ttsToggle() {
+      if (!synth) { alert('Speech not supported'); return; }
+      if (ttsOn) { ttsStop(); return; }
+      const sy = window.scrollY + window.innerHeight / 3;
+      let cl = 0;
+      ttsChs.forEach((c, i) => { if (c.el.offsetTop <= sy) cl = i; });
+      ttsI = cl; ttsOn = true; ttsPd = false;
+      document.getElementById('ttsFab').classList.add('speaking');
+      document.getElementById('ttsFabIcon').innerHTML = '&#x23f9;';
+      document.getElementById('ttsBar').classList.add('active');
+      _ttsRead();
+    }
+
+    function _ttsRead() {
+      if (ttsI >= ttsChs.length) { ttsStop(); return; }
+      synth.cancel();
+      const ch = ttsChs[ttsI];
+      document.getElementById('ttsInfo').textContent = ch.title;
+      ch.el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Split by Japanese sentence endings for reliable playback
+      const sents = ch.text.match(/[^。！？
+]+[。！？]?/g) || [ch.text];
+      let si = 0;
+
+      function next() {
+        if (!ttsOn) return;
+        if (si >= sents.length) {
+          ttsI++;
+          if (ttsI < ttsChs.length) setTimeout(_ttsRead, 800);
+          else ttsStop();
+          return;
+        }
+        const u = new SpeechSynthesisUtterance(sents[si].trim());
+        u.lang = 'ja-JP'; u.rate = ttsRate;
+        const vs = synth.getVoices();
+        const jv = vs.find(v => v.lang && v.lang.startsWith('ja'));
+        if (jv) u.voice = jv;
+        u.onend = () => { si++; next(); };
+        u.onerror = () => { si++; next(); };
+        synth.speak(u);
+      }
+      next();
+    }
+
+    function ttsPause() {
+      if (!ttsOn) return;
+      if (ttsPd) {
+        synth.resume(); ttsPd = false;
+        document.getElementById('ttsPauseBtn').innerHTML = '&#x23f8;';
+      } else {
+        synth.pause(); ttsPd = true;
+        document.getElementById('ttsPauseBtn').innerHTML = '&#x25b6;';
+      }
+    }
+
+    function ttsStop() {
+      synth.cancel(); ttsOn = false; ttsPd = false;
+      document.getElementById('ttsFab').classList.remove('speaking');
+      document.getElementById('ttsFabIcon').innerHTML = '&#x1f50a;';
+      document.getElementById('ttsBar').classList.remove('active');
+      document.getElementById('ttsInfo').textContent = 'Ready';
+      document.getElementById('ttsPauseBtn').innerHTML = '&#x23f8;';
+    }
+
+    function ttsNext() { if (ttsOn && ttsI < ttsChs.length - 1) { ttsI++; _ttsRead(); } }
+    function ttsPrev() { if (ttsOn && ttsI > 0) { ttsI--; _ttsRead(); } }
+    function ttsSetSpeed(v) {
+      ttsRate = parseFloat(v);
+      document.getElementById('ttsSpeedVal').textContent = v + 'x';
+    }
+    if (synth) synth.onvoiceschanged = () => synth.getVoices();
+
+    /* ─── Carousel ─── */
+    (function() {
+      const track = document.getElementById('carouselTrack');
+      if (!track) return;
+      const dots = track.parentElement.querySelectorAll('.carousel-dot');
+      const slides = track.querySelectorAll('.carousel-slide');
+      if (slides.length < 1) return;
+      function updateDots() {
+        const sw = slides[0].offsetWidth + 14;
+        const idx = Math.round(track.scrollLeft / sw);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+      track.addEventListener('scroll', updateDots, { passive: true });
+      dots.forEach(d => d.addEventListener('click', () => {
+        const sw = slides[0].offsetWidth + 14;
+        track.scrollTo({ left: parseInt(d.dataset.idx) * sw, behavior: 'smooth' });
+      }));
+      let paused = false, timer = setInterval(() => {
+        if (paused) return;
+        const sw = slides[0].offsetWidth + 14;
+        const mx = track.scrollWidth - track.clientWidth;
+        const nx = track.scrollLeft + sw;
+        track.scrollTo({ left: nx > mx ? 0 : nx, behavior: 'smooth' });
+      }, 4000);
+      track.addEventListener('touchstart', () => { paused = true; clearInterval(timer); }, { passive: true });
+      track.addEventListener('touchend', () => {
+        paused = false;
+        timer = setInterval(() => {
+          if (paused) return;
+          const sw = slides[0].offsetWidth + 14;
+          const mx = track.scrollWidth - track.clientWidth;
+          const nx = track.scrollLeft + sw;
+          track.scrollTo({ left: nx > mx ? 0 : nx, behavior: 'smooth' });
+        }, 4000);
+      }, { passive: true });
+    })();
+
+  </script>
+</body>
+</html>
